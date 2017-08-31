@@ -8,6 +8,7 @@ import com.jess.arms.integration.AppManager;
 import com.jess.arms.mvp.BasePresenter;
 import com.zwy.neihan.NeiHanConfig;
 import com.zwy.neihan.app.GlobalConfiguration;
+import com.zwy.neihan.app.utils.MyRetryException;
 import com.zwy.neihan.app.utils.RxUtils;
 import com.zwy.neihan.mvp.contract.HomeObjectTabContract;
 import com.zwy.neihan.mvp.model.entity.BaseJson;
@@ -17,8 +18,11 @@ import com.zwy.neihan.mvp.ui.adapter.MainTab1Adapter;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import me.jessyan.rxerrorhandler.core.RxErrorHandler;
 import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
@@ -41,6 +45,7 @@ public class HomeObjectTabPresenter extends BasePresenter<HomeObjectTabContract.
     private ImageLoader mImageLoader;
     private AppManager mAppManager;
     private MainTab1Adapter mainTab1Adapter;
+//    private int retryCount = 30;
 
     @Inject
     public HomeObjectTabPresenter(HomeObjectTabContract.Model model, HomeObjectTabContract.View rootView
@@ -54,47 +59,65 @@ public class HomeObjectTabPresenter extends BasePresenter<HomeObjectTabContract.
     }
 
 
-    public void getData(HomeTabBean homeTabBean, Long lastTime, boolean isUpData, int count) {
-        mainTab1Adapter = new MainTab1Adapter(null);
-        mainTab1Adapter.openLoadAnimation(GlobalConfiguration.ListAnim);
-        mRootView.setAdapter(mainTab1Adapter);
-//        mainTab1Adapter.setEmptyView(mRootView.getEmptyView());
+    public void getData(HomeTabBean homeTabBean, Long lastTime, boolean isUpData, int count, boolean isShowLoading) {
+        if (mainTab1Adapter == null) {
+            mainTab1Adapter = new MainTab1Adapter(null);
+            mainTab1Adapter.openLoadAnimation(GlobalConfiguration.ListAnim);
+            mRootView.setAdapter(mainTab1Adapter);
+        }
         mModel.getMainTab1ObjectData(String.valueOf(homeTabBean.getList_id()), lastTime, count, isUpData)
                 .subscribeOn(Schedulers.io())
                 .retryWhen(new RetryWithDelay(NeiHanConfig.NETWORK_RETRY_TIMES, NeiHanConfig.NETWORK_RETRY_DELAYSECOND))
                 .doOnSubscribe(disposable ->
-                        mRootView.showLoading())
+                        {
+                            if (isShowLoading)
+                                mRootView.showLoading();
+                        }
+                )
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doFinally(() ->
-                        mRootView.hideLoading()
+                        {
+                            if (isShowLoading)
+                                mRootView.hideLoading();
+                        }
+
                 )
                 .compose(RxUtils.bindToLifecycle(mRootView))
+                .flatMap(new Function<BaseJson<NeiHanContentBean>, ObservableSource<BaseJson<NeiHanContentBean>>>() {
+                    @Override
+                    public ObservableSource<BaseJson<NeiHanContentBean>> apply(@NonNull BaseJson<NeiHanContentBean> neiHanContentBeanBaseJson) throws Exception {
+                        if (neiHanContentBeanBaseJson.getCode().equals("retry")) {
+                            return Observable.error(new MyRetryException());
+                        }
+                        return Observable.just(neiHanContentBeanBaseJson);
+                    }
+                })
                 .subscribe(new ErrorHandleSubscriber<BaseJson<NeiHanContentBean>>(mErrorHandler) {
                     @Override
                     public void onNext(@NonNull BaseJson<NeiHanContentBean> data) {
-                        try {
-                            if (data.getData() == null) {
-                                Timber.e(data.toString());
-                                return;
-                            }
-                            mRootView.showNewDataToast(data.getData().getTip(), true);
-                        } catch (Exception e) {
-                            Timber.e("data == null ? " + (data == null));
-                            Timber.e("data.getData() == null ? " + (data.getData() == null));
-                            Timber.e("data.getData().getTip() == null ? " + (data.getData().getTip() == null));
-                            Timber.e("可能是加载缓存出错了," + e.toString());
-                            mRootView.showMessage("可能是加载缓存出错了," + e.toString());
-                        }
+                        mRootView.showNewDataToast(data.getData().getTip(), true);
                             /*刷新数据时 重新设置适配器数据*/
                         if (isUpData) {
                             mainTab1Adapter.setNewData(data.getData().getData());
                         } else {
-                            for (int i = 0; i < data.getData().getData().size(); i++) {
-                                mainTab1Adapter.addData(data.getData().getData().get(i));
+                            for (NeiHanContentBean.DataBean dataBean : data.getData().getData()) {
+                                mainTab1Adapter.addData(dataBean);
                             }
                         }
                         mainTab1Adapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        super.onError(e);
+                        if (e instanceof MyRetryException) {
+                            Timber.e("正在重试....");
+//                            if (retryCount > 0) {
+                                getData(homeTabBean, lastTime, isUpData, count,false);
+//                            }
+//                            retryCount--;
+                        }
                     }
                 });
     }

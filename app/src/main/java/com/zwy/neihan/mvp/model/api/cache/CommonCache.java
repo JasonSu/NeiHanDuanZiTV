@@ -9,6 +9,7 @@ import io.reactivex.Observable;
 import io.rx_cache2.DynamicKey;
 import io.rx_cache2.EvictDynamicKey;
 import io.rx_cache2.LifeCache;
+import io.rx_cache2.Reply;
 
 /**
  * Created by jess on 8/30/16 13:53
@@ -24,6 +25,6 @@ public interface CommonCache {
      * @param isUpdata              是否是更新  为true时不使用缓存   会删除缓存
      * @return
      */
-    @LifeCache(duration = 10, timeUnit = TimeUnit.SECONDS)
-    Observable<BaseJson<NeiHanContentBean>> getMainTab1ObjectDataCache(Observable<BaseJson<NeiHanContentBean>> baseJsonObservable, DynamicKey dynamicKey, EvictDynamicKey isUpdata);
+    @LifeCache(duration = 5, timeUnit = TimeUnit.SECONDS)
+    Observable<Reply<BaseJson<NeiHanContentBean>>> getMainTab1ObjectDataCache(Observable<BaseJson<NeiHanContentBean>> baseJsonObservable, DynamicKey dynamicKey, EvictDynamicKey isUpdata);
 }

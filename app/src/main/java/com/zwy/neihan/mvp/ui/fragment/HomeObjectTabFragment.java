@@ -20,11 +20,13 @@ import com.zwy.neihan.di.component.DaggerHomeObjectTabComponent;
 import com.zwy.neihan.di.module.HomeObjectTabModule;
 import com.zwy.neihan.mvp.contract.HomeObjectTabContract;
 import com.zwy.neihan.mvp.model.entity.HomeTabBean;
+import com.zwy.neihan.mvp.model.entity.NeiHanContentBean;
 import com.zwy.neihan.mvp.presenter.HomeObjectTabPresenter;
 import com.zwy.neihan.mvp.ui.adapter.MainTab1Adapter;
 import com.zwy.neihan.mvp.ui.widget.TipsView;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 import butterknife.BindView;
 import fm.jiecao.jcvideoplayer_lib.JCVideoPlayer;
@@ -77,12 +79,12 @@ public class HomeObjectTabFragment extends BaseFragment<HomeObjectTabPresenter> 
     public void initData(Bundle savedInstanceState) {
         initRecycleView();
         // TODO: 2017/8/28 每次均清除缓存  因为缓存有bug，缓存有效期超时后重新拉取数据会返回 retry。
-        mPresenter.getData(homeTabBean, (long) 0, true, 20);
+            mPresenter.getData(homeTabBean, (long) 0, false, 20,true);
 
     }
 
     private void initRecycleView() {
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext().getApplicationContext()));
     }
 
     /**

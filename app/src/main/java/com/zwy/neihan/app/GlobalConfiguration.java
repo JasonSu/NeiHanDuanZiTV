@@ -17,10 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
 import com.jess.arms.base.App;
 import com.jess.arms.base.delegate.AppLifecycles;
 import com.jess.arms.di.module.GlobalConfigModule;
@@ -44,17 +41,18 @@ import com.zwy.neihan.NeiHanConfig;
 import com.zwy.neihan.R;
 import com.zwy.neihan.app.greendao.DaoMaster;
 import com.zwy.neihan.app.utils.DBUtils;
+import com.zwy.neihan.app.utils.MyRetryException;
 import com.zwy.neihan.mvp.model.api.Api;
-import com.zwy.neihan.mvp.model.entity.BaseJson;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.List;
 
 import butterknife.ButterKnife;
-import io.reactivex.Observable;
 import me.jessyan.progressmanager.ProgressManager;
 import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
 import okhttp3.Interceptor;
@@ -98,47 +96,61 @@ public final class GlobalConfiguration implements ConfigModule {
                            重新请求token,并重新执行请求 */
 //                        try {
 //                            if (!TextUtils.isEmpty(httpResult) && RequestInterceptor.isJson(response.body().contentType())) {
-//                                JSONArray array = new JSONArray(httpResult);
-//                                JSONObject object = (JSONObject) array.get(0);
-//                                String login = object.getString("login");
-//                                String avatar_url = object.getString("avatar_url");
-//                                Timber.w("Result ------> " + login + "    ||   Avatar_url------> " + avatar_url);
+//                                JSONObject object = new JSONObject(httpResult);
+//                                String message = object.getString("message");
+//                                int delay = object.getInt("delay");
+//                                if (message.equals("retry")) {
+//                                    Timber.e("正在发起重试");
+//                                    return new OkHttpClient().newCall(chain.request()).execute();
+////                                    Schedulers.newThread().createWorker().schedule(() -> {
+////                                        AndroidSchedulers.mainThread().createWorker().schedule(() -> {
+////                                            // TODO: 2017/8/31 发起重试
+////                                        });
+////                                    }, delay / 1000, TimeUnit.SECONDS);
+//                                }
 //                            }
 //
 //                        } catch (JSONException e) {
 //                            e.printStackTrace();
-//                            return response;
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
 //                        }
 
                      /* 这里如果发现token过期,可以先请求最新的token,然后在拿新的token放入request里去重新请求
                         注意在这个回调之前已经调用过proceed,所以这里必须自己去建立网络请求,如使用okhttp使用新的request去请求
                         create a new request and modify it accordingly using the new token
-                        Request newRequest = chain.request().newBuilder().header("token", newToken)
-                                             .build();
                         retry the request
-
+                         Request newRequest = chain.request().newBuilder().build();
                         response.body().close();
                         如果使用okhttp将新的请求,请求成功后,将返回的response  return出去即可
                         如果不需要返回新的结果,则直接把response参数返回出去 */
 
-                            if (!TextUtils.isEmpty(httpResult)){
-
-                                try {
-                                    BaseJson baseJson = new Gson().fromJson(httpResult, BaseJson.class);
-                                    if (!baseJson.isSuccess()) {
-                                        if (baseJson.getCode().equals("retry")){
-                                            response.body().close();
-                                            Request newRequest = chain.request().newBuilder()
-                                                    .build();
-                                            Timber.e("正在发起重试");
-                                        }else {
-                                            throw new MVPException(baseJson.getCode());
-                                        }
-                                    }
-                                } catch (JsonSyntaxException e) {
-                                    e.printStackTrace();
-                                }
-                            }
+//                        if (!TextUtils.isEmpty(httpResult)) {
+//
+//                            try {
+//                                BaseJson baseJson = new Gson().fromJson(httpResult, BaseJson.class);
+//                                if (!baseJson.isSuccess()) {
+//                                    if (baseJson.getCode().equals("retry")) {
+//                                        response.body().close();
+//                                        Request newRequest = chain.request().newBuilder()
+//                                                .build();
+//                                        Timber.e("正在发起重试");
+//                                    } else {
+//                                        throw new MVPException(baseJson.getCode());
+//                                    }
+//                                }
+//                            } catch (JsonSyntaxException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//
+//                        Request newRequest = chain.request().newBuilder().build();
+//                        try {
+//                            return    new OkHttpClient().newCall(newRequest).execute();
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//
+//                        }
 
                         return response;
 
@@ -166,10 +178,12 @@ public final class GlobalConfiguration implements ConfigModule {
                     } else if (t instanceof HttpException) {
                         HttpException httpException = (HttpException) t;
                         msg = convertStatusCode(httpException);
-                    } else if (t instanceof JsonParseException || t instanceof ParseException || t instanceof JSONException || t instanceof JsonIOException) {
-                        msg = "数据解析错误";
                     } else if (t instanceof MVPException) {
                         msg = t.getMessage();
+                    } else if (t instanceof JsonParseException || t instanceof ParseException || t instanceof JSONException) {
+                        msg = "数据解析错误";
+                    } else if (t instanceof MyRetryException){
+                        msg = "请求失败，正在重试中……";
                     }
                     ArmsUtils.snackbarText(msg);
                 })

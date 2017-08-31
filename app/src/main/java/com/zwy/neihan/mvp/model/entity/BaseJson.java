@@ -16,7 +16,7 @@ public class BaseJson<T> implements Serializable{
     private T data;
     private String message;
     private String msg;
-
+    private int delay;
     @Override
     public String toString() {
         return "BaseJson{" +
@@ -36,6 +36,30 @@ public class BaseJson<T> implements Serializable{
 
     public String getMsg() {
         return msg;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public int getDelay() {
+        return delay;
+    }
+
+    public void setDelay(int delay) {
+        this.delay = delay;
     }
 
     /**

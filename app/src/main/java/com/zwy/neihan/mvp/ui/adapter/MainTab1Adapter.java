@@ -84,7 +84,11 @@ public class MainTab1Adapter extends BaseQuickAdapter<NeiHanContentBean.DataBean
 
         TextView mUserName = (TextView) helper.getView(R.id.tv_username);
         //标题不能为空
-        mContentText.setText(item.getGroup().getContent());
+        try {
+            mContentText.setText(item.getGroup().getContent());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         mContentText.setOnClickListener(view -> {
             ArmsUtils.showToast("展示详情页面");
@@ -155,7 +159,8 @@ public class MainTab1Adapter extends BaseQuickAdapter<NeiHanContentBean.DataBean
                                         TextView mBadCount, ImageView mCommIcon, TextView mCommCount,
                                         ImageView mSharedIcon, TextView mSharedCount, NineGridView mGridView) {
         NeiHanContentBean.DataBean.GroupBean item = dataBean.getGroup();
-
+        if (item == null)return;
+        Timber.e("item :" + (item == null) + "");
         switch (item.getMedia_type()) {
             case 0:
                 //text

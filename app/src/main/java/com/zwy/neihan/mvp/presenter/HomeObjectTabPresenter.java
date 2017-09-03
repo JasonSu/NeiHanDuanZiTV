@@ -59,7 +59,7 @@ public class HomeObjectTabPresenter extends BasePresenter<HomeObjectTabContract.
     }
 
 
-    public void getData(HomeTabBean homeTabBean, Long lastTime, boolean isUpData, int count, boolean isShowLoading) {
+    public synchronized void getData(HomeTabBean homeTabBean, Long lastTime, boolean isUpData, int count, boolean isShowLoading) {
         if (mainTab1Adapter == null) {
             mainTab1Adapter = new MainTab1Adapter(null);
             mainTab1Adapter.openLoadAnimation(GlobalConfiguration.ListAnim);
@@ -96,6 +96,7 @@ public class HomeObjectTabPresenter extends BasePresenter<HomeObjectTabContract.
                 .subscribe(new ErrorHandleSubscriber<BaseJson<NeiHanContentBean>>(mErrorHandler) {
                     @Override
                     public void onNext(@NonNull BaseJson<NeiHanContentBean> data) {
+                        Timber.e(data+"");
                         mRootView.showNewDataToast(data.getData().getTip(), true);
                             /*刷新数据时 重新设置适配器数据*/
                         if (isUpData) {
@@ -114,7 +115,7 @@ public class HomeObjectTabPresenter extends BasePresenter<HomeObjectTabContract.
                         if (e instanceof MyRetryException) {
                             Timber.e("正在重试....");
 //                            if (retryCount > 0) {
-                                getData(homeTabBean, lastTime, isUpData, count,false);
+                                getData(homeTabBean, lastTime, isUpData, count,true);
 //                            }
 //                            retryCount--;
                         }

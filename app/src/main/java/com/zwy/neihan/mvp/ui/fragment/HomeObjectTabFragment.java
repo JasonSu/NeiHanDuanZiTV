@@ -75,44 +75,44 @@ public class HomeObjectTabFragment extends BaseFragment<HomeObjectTabPresenter> 
         return inflater.inflate(R.layout.fragment_home_object_tab, container, false);
     }
 
-    @Override
-    public void initData(Bundle savedInstanceState) {
-        initRecycleView();
-        // TODO: 2017/8/28 每次均清除缓存  因为缓存有bug，缓存有效期超时后重新拉取数据会返回 retry。
-            mPresenter.getData(homeTabBean, (long) 0, false, 20,true);
-
-    }
 
     private void initRecycleView() {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext().getApplicationContext()));
     }
 
     /**
-     * 此方法是让外部调用使fragment做一些操作的,比如说外部的activity想让fragment对象执行一些方法,
-     * 建议在有多个需要让外界调用的方法时,统一传Message,通过what字段,来区分不同的方法,在setData
-     * 方法中就可以switch做不同的操作,这样就可以用统一的入口方法做不同的事
-     * <p>
-     * 使用此方法时请注意调用时fragment的生命周期,如果调用此setData方法时onCreate还没执行
-     * setData里却调用了presenter的方法时,是会报空的,因为dagger注入是在onCreated方法中执行的,然后才创建的presenter
-     * 如果要做一些初始化操作,可以不必让外部调setData,在initData中初始化就可以了
+     * 对用户可见并且view初始化完成时调用(该处加载数据只会加载一次，比如三个tab每个tab加载过一次就不会再次进入这个方法)
      *
-     * @param data
+     * @param savedInstanceState
      */
-
     @Override
-    public void setData(Object data) {
+    public void initData(Bundle savedInstanceState) {
+        initRecycleView();
+        mPresenter.getData(homeTabBean, (long) 0, false, 20,true);
+    }
+
+    /**
+     * 区别与initData(),该方法每次页面可见是均会加载数据 类似onResume()
+     */
+    @Override
+    public void loadDataEveryTime() {
 
     }
 
+    /**
+     * 页面对用户不可见时(可选)
+     */
+    @Override
+    public void stopLoadData() {
+
+    }
     @Override
     public void showLoading() {
-        if (homeTabBean.getName().equals("推荐"))
             ArmsUtils.showLoading("加载中...", true, this);
     }
 
     @Override
     public void hideLoading() {
-        if (homeTabBean.getName().equals("推荐"))
             ArmsUtils.dissMissLoading();
     }
 
@@ -145,10 +145,8 @@ public class HomeObjectTabFragment extends BaseFragment<HomeObjectTabPresenter> 
     public void onDestroyView() {
         super.onDestroyView();
         homeTabBean = null;
-        try {
+        if (mTipsView!=null){
             mTipsView.destroy();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         mTipsView = null;
     }
@@ -173,7 +171,6 @@ public class HomeObjectTabFragment extends BaseFragment<HomeObjectTabPresenter> 
      */
     @Override
     public void showNewDataToast(String msg, boolean isPlaySound) {
-        if (homeTabBean.getName().equals("推荐"))
             mTipsView = TipsView.init(new WeakReference<Context>(getActivity().getApplicationContext()).get(), msg, isPlaySound).showNewDataToast();
     }
 

@@ -249,8 +249,6 @@ public final class AppManager {
             mLoadingView.setOnCancelListener(() -> onCancelListener.onCancel());
         }
     }
-
-
     private void dissMissLoadingDialog() {
         try {
             mLoadingView.dissMissDialog();
@@ -442,7 +440,6 @@ public final class AppManager {
         mActivityList.clear();
         mActivityList = null;
         mCurrentActivity = null;
-        mApplication = null;
         toastView = null;
 //        mDialog = null;
         this.mLoadingView = null;
@@ -456,12 +453,14 @@ public final class AppManager {
     public void appExit() {
         try {
             killAll();
+            release();
             if (mActivityList != null)
                 mActivityList = null;
             ActivityManager activityMgr =
                     (ActivityManager) mApplication.getSystemService(Context.ACTIVITY_SERVICE);
             activityMgr.killBackgroundProcesses(mApplication.getPackageName());
-            release();
+            mApplication = null;
+            activityMgr = null;
             System.exit(0);
             for (int i = 0; i < 100; i++) {
                 System.gc();

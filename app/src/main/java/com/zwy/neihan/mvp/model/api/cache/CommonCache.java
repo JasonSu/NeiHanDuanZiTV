@@ -25,6 +25,6 @@ public interface CommonCache {
      * @param isUpdata              是否是更新  为true时不使用缓存   会删除缓存
      * @return
      */
-    @LifeCache(duration = 5, timeUnit = TimeUnit.SECONDS)
+    @LifeCache(duration = 0, timeUnit = TimeUnit.SECONDS)
     Observable<Reply<BaseJson<NeiHanContentBean>>> getMainTab1ObjectDataCache(Observable<BaseJson<NeiHanContentBean>> baseJsonObservable, DynamicKey dynamicKey, EvictDynamicKey isUpdata);
 }

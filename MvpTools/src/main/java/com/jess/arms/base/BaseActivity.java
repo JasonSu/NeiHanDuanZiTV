@@ -6,9 +6,9 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.jess.arms.R;
 import com.jess.arms.base.delegate.IActivity;
 import com.jess.arms.mvp.IPresenter;
+import com.jess.arms.utils.ACache;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import javax.inject.Inject;
@@ -27,6 +27,7 @@ public abstract class BaseActivity<P extends IPresenter> extends RxAppCompatActi
     private Unbinder mUnbinder;
     @Inject
     protected P mPresenter;
+    protected ACache mCache;
 
     @Override
     public View onCreateView(String name, Context context, AttributeSet attrs) {
@@ -37,6 +38,7 @@ public abstract class BaseActivity<P extends IPresenter> extends RxAppCompatActi
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mCache = mCache == null ? ACache.get(getApplicationContext()) : mCache;
         try {
             int layoutResID = initView(savedInstanceState);
             if (layoutResID != 0) {//如果initView返回0,框架则不会调用setContentView(),当然也不会 Bind ButterKnife

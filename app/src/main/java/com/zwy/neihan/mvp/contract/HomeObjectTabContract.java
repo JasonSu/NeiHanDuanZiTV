@@ -19,6 +19,11 @@ public interface HomeObjectTabContract {
         void setAdapter(MainTab1Adapter mainTab1Adapter);
 
         /**
+         * 设置最后一次更新的时间
+         * @param lastTime
+         */
+        void setLastTime(Long lastTime);
+        /**
          * 刷新后的红条通知
          *
          * @param msg
@@ -27,6 +32,11 @@ public interface HomeObjectTabContract {
         void showNewDataToast(String msg, boolean isPlaySound);
 
 
+        /**
+         * 设置刷新的状态
+         * @param isRefresh
+         */
+        void setRefreshState(boolean isRefresh);
         @LayoutRes int  getEmptyView();
     }
 

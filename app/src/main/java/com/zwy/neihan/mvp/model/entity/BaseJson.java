@@ -26,6 +26,7 @@ public class BaseJson<T> implements Serializable{
                 '}';
     }
 
+
     public T getData() {
         return data;
     }

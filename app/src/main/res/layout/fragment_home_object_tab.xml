@@ -4,11 +4,15 @@
                                      android:layout_height="match_parent"
                                      android:background="@color/main_bg"
                                      android:orientation="vertical">
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_tab1_object"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/sw"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_tab1_object"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    </android.support.v7.widget.RecyclerView>
+        </android.support.v7.widget.RecyclerView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 </com.zhy.autolayout.AutoLinearLayout>

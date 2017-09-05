@@ -32,6 +32,10 @@ public interface HomeObjectTabContract {
         void showNewDataToast(String msg, boolean isPlaySound);
 
 
+        void startAnim();
+
+
+        void stopAnim();
         /**
          * 设置刷新的状态
          * @param isRefresh

@@ -13,6 +13,7 @@ import com.jess.arms.mvp.BasePresenter;
 import com.jess.arms.widget.tablayout.CommonTabLayout;
 import com.jess.arms.widget.tablayout.listener.OnTabSelectListener;
 import com.jess.arms.widget.tablayout.widget.MsgView;
+import com.zwy.neihan.app.EventBusTags;
 import com.zwy.neihan.mvp.contract.MainContract;
 import com.zwy.neihan.mvp.ui.activity.SenderActivity;
 import com.zwy.neihan.mvp.ui.adapter.MyPagerAdapter;
@@ -21,6 +22,8 @@ import com.zwy.neihan.mvp.ui.fragment.MainTab2Fragment;
 import com.zwy.neihan.mvp.ui.fragment.MainTab3Fragment;
 import com.zwy.neihan.mvp.ui.fragment.MainTab4Fragment;
 import com.zwy.neihan.mvp.ui.widget.MyTabHost;
+
+import org.simple.eventbus.EventBus;
 
 import java.util.ArrayList;
 
@@ -92,7 +95,8 @@ public class MainPresenter extends BasePresenter<MainContract.Model, MainContrac
                 switch (position) {
                     case 0:
                         if (mFragments.get(0) != null) {
-                            ((MainTab1Fragment) mFragments.get(0)).showMessage("刷新首页");
+                            EventBus.getDefault().post("", EventBusTags.HOME_TAB_REFRESH);
+//                            ((MainTab1Fragment) mFragments.get(0)).onClick("刷新首页");
                         }
                         break;
 

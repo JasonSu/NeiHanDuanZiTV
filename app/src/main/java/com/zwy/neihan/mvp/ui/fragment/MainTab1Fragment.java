@@ -17,23 +17,17 @@ import com.jess.arms.widget.dialog.loading.OnCancelListener;
 import com.jess.arms.widget.tablayout.SlidingTabLayout;
 import com.jess.arms.widget.tablayout.listener.OnTabSelectListener;
 import com.zwy.neihan.R;
-import com.zwy.neihan.app.utils.DBUtils;
+import com.zwy.neihan.app.EventBusTags;
 import com.zwy.neihan.di.component.DaggerMainTab1Component;
 import com.zwy.neihan.di.module.MainTab1Module;
 import com.zwy.neihan.mvp.contract.MainTab1Contract;
 import com.zwy.neihan.mvp.presenter.MainTab1Presenter;
-import com.zwy.neihan.mvp.ui.activity.GuideActivity;
-import com.zwy.neihan.mvp.ui.activity.MainActivity;
 import com.zwy.neihan.mvp.ui.adapter.PageAdapter;
 
-import java.util.concurrent.TimeUnit;
+import org.simple.eventbus.EventBus;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.Unbinder;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 import static com.jess.arms.utils.Preconditions.checkNotNull;
@@ -171,11 +165,11 @@ public class MainTab1Fragment extends BaseFragment<MainTab1Presenter> implements
 
     }
 
-    @OnClick({ R.id.iv_refresh})
+    @OnClick({R.id.iv_refresh})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_refresh:
-                showMessage("刷新");
+                EventBus.getDefault().post("", EventBusTags.HOME_TAB_REFRESH);
                 break;
         }
     }

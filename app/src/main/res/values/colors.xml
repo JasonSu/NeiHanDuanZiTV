@@ -2,6 +2,7 @@
 <resources>
     <color name="colorPrimary">#3FA862</color>
     <color name="colorPrimaryDark">#3FA862</color>
+    <color name="colorPrimaryDarkff">#803FA862</color>
     <color name="colorAccent">#FF4081</color>
 
     <color name="abc_search_url_text_normal">#ff7fa87f</color>
@@ -19,6 +20,8 @@
     <color name="silver">#ffc0c0c0</color>
     <color name="black">#ff000000</color>
     <color name="red">#ffff0000</color>
+    <color name="redff">#c0ff6e9e</color>
+
     <color name="simple_333333">#ff333333</color>
     <color name="transparent">#00000000</color>
     <color name="simple_eeeeee">#ffeeeeee</color>

@@ -70,6 +70,7 @@ public class HomeObjectTabPresenter extends BasePresenter<HomeObjectTabContract.
                         addDispose(disposable);
                         if (isShowLoading || isUpData)
                             mRootView.setRefreshState(true);
+//                        mRootView.startAnim();
 //                            mRootView.showLoading();
 //                        if (isUpData){
 //
@@ -81,6 +82,7 @@ public class HomeObjectTabPresenter extends BasePresenter<HomeObjectTabContract.
                     public void onFinally() {
                         if (isShowLoading || isUpData)
                             mRootView.setRefreshState(false);
+                        mRootView.stopAnim();
 //                            mRootView.hideLoading();
 //                        if (isUpData){
 //

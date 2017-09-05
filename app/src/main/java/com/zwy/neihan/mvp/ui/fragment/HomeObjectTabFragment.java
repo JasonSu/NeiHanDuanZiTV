@@ -3,6 +3,7 @@ package com.zwy.neihan.mvp.ui.fragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -11,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.jess.arms.base.BaseFragment;
@@ -18,6 +20,7 @@ import com.jess.arms.di.component.AppComponent;
 import com.jess.arms.utils.ArmsUtils;
 import com.jess.arms.widget.dialog.loading.OnCancelListener;
 import com.zwy.neihan.R;
+import com.zwy.neihan.app.EventBusTags;
 import com.zwy.neihan.di.component.DaggerHomeObjectTabComponent;
 import com.zwy.neihan.di.module.HomeObjectTabModule;
 import com.zwy.neihan.mvp.contract.HomeObjectTabContract;
@@ -26,10 +29,14 @@ import com.zwy.neihan.mvp.presenter.HomeObjectTabPresenter;
 import com.zwy.neihan.mvp.ui.adapter.MainTab1Adapter;
 import com.zwy.neihan.mvp.ui.widget.TipsView;
 
+import org.simple.eventbus.Subscriber;
+import org.simple.eventbus.ThreadMode;
+
 import java.lang.ref.WeakReference;
 
 import butterknife.BindView;
 import fm.jiecao.jcvideoplayer_lib.JCVideoPlayer;
+import timber.log.Timber;
 
 import static com.jess.arms.utils.Preconditions.checkNotNull;
 
@@ -49,9 +56,12 @@ public class HomeObjectTabFragment extends BaseFragment<HomeObjectTabPresenter> 
     RecyclerView mRecyclerView;
     @BindView(R.id.sw)
     SwipeRefreshLayout mSw;
+    @BindView(R.id.iv_loading)
+    ImageView mIvLoading;
     private HomeTabBean homeTabBean;
     private TipsView mTipsView;
-    private Long lastTime=0l;
+    private Long lastTime = 0l;
+    private AnimationDrawable mAnimationDrawable;
 
     public static HomeObjectTabFragment newInstance(HomeTabBean homeTabBean) {
         HomeObjectTabFragment fragment = new HomeObjectTabFragment(homeTabBean);
@@ -90,12 +100,13 @@ public class HomeObjectTabFragment extends BaseFragment<HomeObjectTabPresenter> 
      */
     @Override
     public void initData(Bundle savedInstanceState) {
+        mAnimationDrawable = ((AnimationDrawable) mIvLoading.getDrawable());
         initRecycleView();
-        mPresenter.getData(homeTabBean, lastTime, false, 10, true,false);
+        mPresenter.getData(homeTabBean, lastTime, false, 5, true, false);
         mSw.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mPresenter.getData(homeTabBean, lastTime, true, 30, true,false);
+                mPresenter.getData(homeTabBean, lastTime, true, 30, true, false);
             }
         });
     }
@@ -174,7 +185,7 @@ public class HomeObjectTabFragment extends BaseFragment<HomeObjectTabPresenter> 
         mainTab1Adapter.setOnLoadMoreListener(new BaseQuickAdapter.RequestLoadMoreListener() {
             @Override
             public void onLoadMoreRequested() {
-                mPresenter.getData(homeTabBean, lastTime, false, 20, false,true);
+                mPresenter.getData(homeTabBean, lastTime, false, 30, false, true);
             }
         });
     }
@@ -200,6 +211,18 @@ public class HomeObjectTabFragment extends BaseFragment<HomeObjectTabPresenter> 
         mTipsView = TipsView.init(new WeakReference<Context>(getActivity().getApplicationContext()).get(), msg, isPlaySound).showNewDataToast();
     }
 
+    @Override
+    public void startAnim() {
+        mIvLoading.setVisibility(View.VISIBLE);
+        mAnimationDrawable.start();
+    }
+
+    @Override
+    public void stopAnim() {
+        mAnimationDrawable.stop();
+        mIvLoading.setVisibility(View.GONE);
+    }
+
     /**
      * 设置刷新的状态
      *
@@ -215,4 +238,11 @@ public class HomeObjectTabFragment extends BaseFragment<HomeObjectTabPresenter> 
         return R.layout.nulldataview;
     }
 
+    @Subscriber(tag = EventBusTags.HOME_TAB_REFRESH, mode = ThreadMode.MAIN)
+    public void onMainRefreshButtonClicked(String str) {
+        if (this.getUserVisibleHint()) {
+            Timber.d("刷新页面 - " + homeTabBean.getName());
+            mPresenter.getData(homeTabBean, lastTime, true, 30, false, false);
+        }
+    }
 }

@@ -73,18 +73,18 @@ android {
     }
 
     //开启webp图片压缩时 开启如下任务
-//    webpCompress {
-//        q = 80  //压缩比例 0～100，100是无损压缩，默认80
-//        skipDebug = true //debug下是否开启webp压缩 默认不开启
-//        cwebpPath = "/Users/zhaowenyun/Documents/libwebp-0.6.0-rc3-mac-10.12/bin/cwebp" //cwebp命令的路径
-//        openLog = true  //是否打开log
-//        filterAlpha = true //是否过滤有透明通道的图片
-//        whiteList = [
-//                "notify_panel_notification_icon_bg.png"
-//        ]
-//
-//        //配置压缩白名单
-//    }
+    webpCompress {
+        q = 80  //压缩比例 0～100，100是无损压缩，默认80
+        skipDebug = true //debug下是否开启webp压缩 默认不开启
+        cwebpPath = "/Users/zhaowenyun/Documents/libwebp-0.6.0-rc3-mac-10.12/bin/cwebp" //cwebp命令的路径
+        openLog = true  //是否打开log
+        filterAlpha = true //是否过滤有透明通道的图片
+        whiteList = [
+                "notify_panel_notification_icon_bg.png"
+        ]
+
+        //配置压缩白名单
+    }
 }
 
 buildscript {
